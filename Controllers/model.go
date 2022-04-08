@@ -27,7 +27,7 @@ type ArrPenggunaResponse struct {
 }
 
 type Buku struct {
-	Isbn       int       `json:"isbn"`
+	Isbn       string    `json:"isbn"`
 	Judul      string    `json:"judul"`
 	Penulis    string    `json:"penulis"`
 	Edisi      int       `json:"edisi"`
@@ -52,7 +52,7 @@ type ArrBukuResponse struct {
 type UlasanPenilaian struct {
 	Ulasan    string `json:"ulasan"`
 	Penilaian int    `json:"penilaian"`
-	Isbn      int    `json:"isbn"`
+	Isbn      string `json:"isbn"`
 	Email     string `json:"email"`
 }
 
@@ -65,7 +65,7 @@ type ArrUlasanPenilaianResponse struct {
 }
 
 type Kupon struct {
-	Kode          string    `json:"kode"`
+	Kode          int       `json:"kode"`
 	BerlakuSampai time.Time `json:"berlaku_sampai"`
 	Nominal       int       `json:"nominal"`
 }
@@ -77,11 +77,11 @@ type KuponResponse struct {
 type Transaksi struct {
 	IdTransaksi      int       `json:"id_transaksi"`
 	Email            string    `json:"email"`
-	Isbn             int       `json:"isbn"`
+	Isbn             string    `json:"isbn"`
 	TanggalTransaksi time.Time `json:"tanggal_transaksi"`
 	JenisTransaksi   string    `json:"jenis_transaksi"`
-	HargaTransaksi   int       `json:"harga_transaksi"`
-	Potongan         int       `json:"potongan"`
+	NominalTransaksi int       `json:"nominal_transaksi"`
+	Kupon            int       `json:"kupon"`
 }
 
 type TransaksiResponse struct {
