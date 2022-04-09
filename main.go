@@ -16,7 +16,8 @@ func main() {
 	router := mux.NewRouter()
 
 	//endpoints
-	router.HandleFunc("/books", Controllers.AddNewBook).Methods("POST")
+	router.HandleFunc("/books", Controllers.AddNewBook).Methods("POST")          //add new book
+	router.HandleFunc("/books/{isbn}", Controllers.DeleteBook).Methods("DELETE") //delete book
 
 	//cors
 	corsHandler := cors.New(cors.Options{
