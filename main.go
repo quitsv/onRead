@@ -1,6 +1,7 @@
 package main
 
 import (
+	"PBPPrak/Tubes/Controllers"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,6 +16,7 @@ func main() {
 	router := mux.NewRouter()
 
 	//endpoints
+	router.HandleFunc("/books", Controllers.AddNewBook).Methods("POST")
 
 	//cors
 	corsHandler := cors.New(cors.Options{
