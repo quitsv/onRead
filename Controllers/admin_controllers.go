@@ -29,7 +29,6 @@ func AddNewBook(w http.ResponseWriter, r *http.Request) {
 	result, errQuery := db.Exec("insert into buku (isbn, judul, penulis, edisi, tahun_cetak, harga) values (?, ?, ?, ?, ?, ?)", isbn, judul, penulis, edisi, tahun_cetak, harga)
 
 	num, _ := result.RowsAffected()
-
 	if errQuery == nil {
 		if num != 0 {
 			PrintSuccess(200, "Tambah buku berhasil", w)
@@ -101,5 +100,26 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		PrintError(400, "Update buku gagal", w)
+	}
+}
+
+func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	db := Connect()
+	defer db.Close()
+
+	email := r.URL.Query()["email"]
+
+	result, errQuery := db.Exec("delete from pengguna where email = ?", email[0])
+
+	num, _ := result.RowsAffected()
+
+	if errQuery == nil {
+		if num != 0 {
+			PrintSuccess(200, "Hapus pengguna berhasil", w)
+		} else {
+			PrintError(400, "Tidak ada pengguna ditemukan", w)
+		}
+	} else {
+		PrintError(400, "Hapus pengguna gagal", w)
 	}
 }
