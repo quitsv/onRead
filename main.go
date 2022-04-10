@@ -26,7 +26,7 @@ func main() {
 	router.HandleFunc("/booksFilter/{id_genre}", Controllers.LookAllBookListFilterByGenre).Methods("GET") // Get All List Book by genre
 	router.HandleFunc("/bestSeller", Controllers.LookAllBestSellerBook).Methods("GET")                    // Get All Best Seller Book
 	router.HandleFunc("/bestSeller/{id_genre}", Controllers.LookAllBestSellerBookByGenre).Methods("GET")  // Get All Best Seller Book By Genre
-
+	router.HandleFunc("/searchBook/{judul}/{penulis}/{isbn}", Controllers.SearchBook).Methods("GET")      // Search Book By Parameters
 	//cors
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
