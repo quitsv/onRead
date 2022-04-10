@@ -148,3 +148,72 @@ func GetDetailBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
+
+func LookAllBestSellerBook(w http.ResponseWriter, r *http.Request) {
+	db := Connect()
+	defer db.Close()
+
+	query := "SELECT b.isbn,b.judul,b.penulis,b.edisi,b.tahun_cetak,b.harga from transaksi a join buku b on a.isbn = b.isbn group by a.isbn order by count(id_transaksi) DESC;"
+
+	rows, err := db.Query(query)
+	if err != nil {
+		log.Println(err)
+	}
+
+	var book Buku
+	var books []Buku
+
+	n := 0
+
+	for rows.Next() && n < 5 {
+		if err := rows.Scan(&book.Isbn, &book.Judul, &book.Penulis, &book.Edisi, &book.TahunCetak, &book.Harga); err != nil {
+			log.Fatal(err)
+		} else {
+			books = append(books, book)
+		}
+		n++
+	}
+
+	var response ArrBukuResponse
+
+	response.Data = books
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func LookAllBestSellerBookByGenre(w http.ResponseWriter, r *http.Request) {
+	db := Connect()
+	defer db.Close()
+
+	vars := mux.Vars(r)
+	idGenre := vars["id_genre"]
+
+	query := "SELECT b.isbn,b.judul,b.penulis,b.edisi,b.tahun_cetak,b.harga from transaksi a join buku b on a.isbn = b.isbn join genrebuku c on c.isbn = b.isbn WHERE c.id_genre =" + idGenre + " group by a.isbn order by count(id_transaksi) DESC"
+
+	rows, err := db.Query(query)
+	if err != nil {
+		log.Println(err)
+	}
+
+	var book Buku
+	var books []Buku
+
+	n := 0
+
+	for rows.Next() && n < 5 {
+		if err := rows.Scan(&book.Isbn, &book.Judul, &book.Penulis, &book.Edisi, &book.TahunCetak, &book.Harga); err != nil {
+			log.Fatal(err)
+		} else {
+			books = append(books, book)
+		}
+		n++
+	}
+
+	var response ArrBukuResponse
+
+	response.Data = books
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
