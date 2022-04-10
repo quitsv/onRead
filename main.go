@@ -22,6 +22,7 @@ func main() {
 	router.HandleFunc("/pengguna", Controllers.DeleteUser).Methods("DELETE")                              //delete user
 	router.HandleFunc("/books", Controllers.LookAllBookList).Methods("GET")                               // Get All List Book
 	router.HandleFunc("/booksFilter/{id_genre}", Controllers.LookAllBookListFilterByGenre).Methods("GET") // Get All List Book by genre
+	router.HandleFunc("/bestSeller", Controllers.LookAllBookList).Methods("GET")                          // Get All Best Seller Book
 	//cors
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},

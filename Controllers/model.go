@@ -64,6 +64,21 @@ type ArrUlasanPenilaianResponse struct {
 	Data []UlasanPenilaian `json:"data"`
 }
 
+type DetailBuku struct {
+	Isbn       string            `json:"isbn"`
+	Judul      string            `json:"judul"`
+	Penulis    string            `json:"penulis"`
+	Edisi      int               `json:"edisi"`
+	TahunCetak time.Time         `json:"tahun_cetak"`
+	Harga      int               `json:"harga"`
+	Genre      []Genre           `json:"genre"`
+	Ulasan     []UlasanPenilaian `json:"ulasan"`
+}
+
+type DetailBukuResponse struct {
+	Data DetailBuku `json:"data"`
+}
+
 type Kupon struct {
 	Kode          int       `json:"kode"`
 	BerlakuSampai time.Time `json:"berlaku_sampai"`
