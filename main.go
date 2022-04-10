@@ -17,6 +17,7 @@ func main() {
 
 	//endpoints
 	router.HandleFunc("/books", Controllers.AddNewBook).Methods("POST")          //add new book
+	router.HandleFunc("/books", Controllers.GetDetailBook).Methods("GET")        //get detail book
 	router.HandleFunc("/books/{isbn}", Controllers.DeleteBook).Methods("DELETE") //delete book
 	router.HandleFunc("/books/{isbn}", Controllers.UpdateBook).Methods("PUT")    //update book
 	router.HandleFunc("/pengguna", Controllers.DeleteUser).Methods("DELETE")     //delete user
