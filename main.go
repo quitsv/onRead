@@ -16,11 +16,15 @@ func main() {
 	router := mux.NewRouter()
 
 	//endpoints
-	router.HandleFunc("/books", Controllers.AddNewBook).Methods("POST")          //add new book
-	router.HandleFunc("/books", Controllers.GetDetailBook).Methods("GET")        //get detail book
-	router.HandleFunc("/books/{isbn}", Controllers.DeleteBook).Methods("DELETE") //delete book
-	router.HandleFunc("/books/{isbn}", Controllers.UpdateBook).Methods("PUT")    //update book
-	router.HandleFunc("/pengguna", Controllers.DeleteUser).Methods("DELETE")     //delete user
+
+	router.HandleFunc("/books", Controllers.AddNewBook).Methods("POST")                                   //add new book
+  router.HandleFunc("/books", Controllers.GetDetailBook).Methods("GET")                                 //get detail book
+	router.HandleFunc("/books/{isbn}", Controllers.DeleteBook).Methods("DELETE")                          //delete book
+	router.HandleFunc("/books/{isbn}", Controllers.UpdateBook).Methods("PUT")                             //update book
+	router.HandleFunc("/pengguna", Controllers.DeleteUser).Methods("DELETE")                              //delete user
+	router.HandleFunc("/books", Controllers.LookAllBookList).Methods("GET")                               // Get All List Book
+	router.HandleFunc("/booksFilter/{id_genre}", Controllers.LookAllBookListFilterByGenre).Methods("GET") // Get All List Book by genre
+	router.HandleFunc("/bestSeller", Controllers.LookAllBookList).Methods("GET")                          // Get All Best Seller Book
 
 	//cors
 	corsHandler := cors.New(cors.Options{
