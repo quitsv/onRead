@@ -217,3 +217,34 @@ func LookAllBestSellerBookByGenre(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
+
+func SearchBook(w http.ResponseWriter, r *http.Request) {
+	db := Connect()
+	defer db.Close()
+
+	judul := r.Form.Get("judul")
+	penulis := r.Form.Get("penulis")
+	isbn := r.Form.Get("isbn")
+
+	query := ("Select * from buku where judul =" + judul + " , penulis = " + penulis + " , isbn =" + isbn)
+
+	rows, err := db.Query(query)
+	if err != nil {
+		log.Println(err)
+	}
+
+	var book Buku
+
+	if err := rows.Scan(&book.Isbn, &book.Judul, &book.Penulis, &book.Edisi, &book.TahunCetak, &book.Harga); err != nil {
+		log.Fatal(err)
+	} else {
+		book = book
+	}
+
+	var response BukuResponse
+
+	response.Data = book
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
