@@ -1,6 +1,8 @@
 package Controllers
 
-import "time"
+import (
+	"time"
+)
 
 type SuccessResponse struct {
 	Status  int    `json:"status"`

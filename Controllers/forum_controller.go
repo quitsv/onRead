@@ -34,24 +34,27 @@ func ViewForum(w http.ResponseWriter, r *http.Request) {
 		arrForumResponse.Data = append(arrForumResponse.Data, forum)
 	}
 
-	json.NewEncoder(w).Encode(arrForumResponse)
+	if len(arrForumResponse.Data) > 0 {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(arrForumResponse)
+	} else {
+		PrintError(400, "Tidak ada data", w)
+	}
 }
 
 func WriteForum(w http.ResponseWriter, r *http.Request) {
 	db := Connect()
 	defer db.Close()
 
-	var arrForumResponse ArrForumResponse
-
-	email := r.FormValue("email")
+	_, email, _, _ := validateTokenFromCookies(r)
 	waktuDikirim := time.Now()
 	pesan := r.FormValue("pesan")
 
 	_, err := db.Exec("INSERT INTO forum (email, waktu_dikirim, pesan) VALUES (?, ?, ?)", email, waktuDikirim, pesan)
 	if err != nil {
 		fmt.Println(err)
-		return
+		PrintError(400, "Gagal menulis forum", w)
+	} else {
+		PrintSuccess(200, "Berhasil menulis forum", w)
 	}
-
-	json.NewEncoder(w).Encode(arrForumResponse)
 }

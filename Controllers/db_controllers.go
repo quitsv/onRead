@@ -14,8 +14,7 @@ func Connect() *sql.DB {
 		log.Fatal("Error loading .env file")
 	}
 
-	db_url := os.Getenv("DATABASE")
-	db, err := sql.Open("mysql", db_url)
+	db, err := sql.Open("mysql", os.Getenv("DATABASE"))
 	if err != nil {
 		log.Fatal(err)
 	}
