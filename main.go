@@ -28,6 +28,8 @@ func main() {
 	router.HandleFunc("/bestSeller/{id_genre}", Controllers.LookAllBestSellerBookByGenre).Methods("GET")  // Get All Best Seller Book By Genre
 	router.HandleFunc("/searchBook/{judul}/{penulis}/{isbn}", Controllers.SearchBook).Methods("GET")      // Search Book By Parameters
 	router.HandleFunc("/books/{book_id}/rent", Controllers.RentBook).Methods("POST")                      // Rent Book without Coupon
+	router.HandleFunc("/forum", Controllers.ViewForum).Methods("GET")                                     // View Forum
+	router.HandleFunc("/forum", Controllers.WriteForum).Methods("POST")                                   // Write Forum
 
 	//cors
 	corsHandler := cors.New(cors.Options{
