@@ -35,7 +35,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func LoginUser(w http.ResponseWriter, r *http.Request) {
+func Login(w http.ResponseWriter, r *http.Request) {
 	db := Connect()
 	defer db.Close()
 
@@ -72,7 +72,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func LogoutUser(w http.ResponseWriter, r *http.Request) {
+func Logout(w http.ResponseWriter, r *http.Request) {
 	resetUserToken(w)
 	PrintSuccess(200, "Logged Out", w)
 }

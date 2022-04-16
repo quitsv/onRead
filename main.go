@@ -30,6 +30,9 @@ func main() {
 	router.HandleFunc("/books/{book_id}/rent", Controllers.Authenticate(Controllers.RentBook, 0)).Methods("POST") // Rent Book without Coupon (user only)
 	router.HandleFunc("/forum", Controllers.ViewForum).Methods("GET")                                             // View Forum
 	router.HandleFunc("/forum", Controllers.Authenticate(Controllers.WriteForum, 0)).Methods("POST")              // Write Forum (user only)
+	router.HandleFunc("/login", Controllers.Login).Methods("POST")                                                // Login User
+	router.HandleFunc("/logout", Controllers.Logout).Methods("POST")                                              // Logout User
+	router.HandleFunc("/register", Controllers.Register).Methods("POST")                                          // Register User
 
 	//cors
 	corsHandler := cors.New(cors.Options{
