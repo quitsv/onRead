@@ -36,6 +36,7 @@ type Buku struct {
 	TahunCetak time.Time `json:"tahun_cetak"`
 	Harga      int       `json:"harga"`
 	Genre      []Genre   `json:"genre"`
+	PathFile   string    `json:"path_file"`
 }
 
 type Genre struct {

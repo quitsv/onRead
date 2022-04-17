@@ -2,8 +2,10 @@ package Controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -247,4 +249,76 @@ func SearchBook(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+func ReadBook(w http.ResponseWriter, r *http.Request) {
+	db := Connect()
+	defer db.Close()
+
+	_, email, _, _ := validateTokenFromCookies(r)
+
+	vars := mux.Vars(r)
+	isbn := vars["isbn"]
+
+	var transaksi Transaksi
+	var arrTransaksi []Transaksi
+
+	rows, err := db.Query("SELECT * FROM transaksi WHERE email = ? AND isbn = ?", email, isbn)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for rows.Next() {
+		err := rows.Scan(&transaksi.IdTransaksi, &transaksi.NominalTransaksi, &transaksi.JenisTransaksi, &transaksi.TanggalTransaksi, &transaksi.Isbn, &transaksi.Email, &transaksi.Kupon)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		arrTransaksi = append(arrTransaksi, transaksi)
+	}
+
+	haveBook := false
+	for i := 0; i < len(arrTransaksi); i++ {
+		if arrTransaksi[i].JenisTransaksi == "beli" {
+			haveBook = true
+			return
+		} else if arrTransaksi[i].JenisTransaksi == "sewa" && arrTransaksi[i].TanggalTransaksi.AddDate(0, 0, 30).After(time.Now()) {
+			haveBook = true
+			return
+		}
+	}
+
+	if haveBook {
+		rows, err := db.Query("SELECT path_file FROM buku WHERE isbn = ?", isbn)
+
+		if err != nil {
+			fmt.Println(err)
+			PrintError(400, "error query", w)
+		}
+
+		var buku Buku
+		var arrBuku []Buku
+		var bukuResponse BukuResponse
+
+		for rows.Next() {
+			if err := rows.Scan(&buku.PathFile); err != nil {
+				fmt.Println(err)
+			} else {
+				arrBuku = append(arrBuku, buku)
+			}
+		}
+
+		if len(arrBuku) > 0 {
+			bukuResponse.Data = arrBuku[0]
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(bukuResponse)
+		} else {
+			PrintError(400, "Tidak ada data", w)
+		}
+	} else {
+		PrintError(404, "Anda tidak memiliki buku tersebut", w)
+	}
 }
