@@ -2,8 +2,10 @@ package Controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -250,6 +252,77 @@ func SearchBook(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func ReadBook(w http.ResponseWriter, r *http.Request) {
+	db := Connect()
+	defer db.Close()
+
+	_, email, _, _ := validateTokenFromCookies(r)
+
+	vars := mux.Vars(r)
+	isbn := vars["isbn"]
+
+	var transaksi Transaksi
+	var arrTransaksi []Transaksi
+
+	rows, err := db.Query("SELECT id_transaksi, jenis_transaksi, tanggal_transaksi, isbn, email FROM transaksi WHERE email = ? AND isbn = ?", email, isbn)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for rows.Next() {
+		err := rows.Scan(&transaksi.IdTransaksi, &transaksi.JenisTransaksi, &transaksi.TanggalTransaksi, &transaksi.Isbn, &transaksi.Email)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		arrTransaksi = append(arrTransaksi, transaksi)
+	}
+
+	haveBook := false
+	for i := 0; i < len(arrTransaksi); i++ {
+		if arrTransaksi[i].JenisTransaksi == "beli" {
+			haveBook = true
+			break
+		} else if arrTransaksi[i].JenisTransaksi == "sewa" && arrTransaksi[i].TanggalTransaksi.AddDate(0, 0, 30).After(time.Now()) {
+			haveBook = true
+			break
+		}
+	}
+
+	if haveBook {
+		rows, err := db.Query("SELECT * FROM buku WHERE isbn = ?", isbn)
+
+		if err != nil {
+			fmt.Println(err)
+			PrintError(400, "error query", w)
+		}
+
+		var buku Buku
+		var arrBuku []Buku
+		var bukuResponse BukuResponse
+
+		for rows.Next() {
+			if err := rows.Scan(&buku.Isbn, &buku.Judul, &buku.Penulis, &buku.Edisi, &buku.TahunCetak, &buku.Harga, &buku.PathFile); err != nil {
+				fmt.Println("err 2")
+				fmt.Println(err)
+			} else {
+				arrBuku = append(arrBuku, buku)
+			}
+		}
+
+		if len(arrBuku) > 0 {
+			bukuResponse.Data = arrBuku[0]
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(bukuResponse)
+		} else {
+			PrintError(400, "Tidak ada data", w)
+		}
+	} else {
+		PrintError(404, "Anda tidak memiliki buku tersebut", w)
+    
 func RateBook(w http.ResponseWriter, r *http.Request) {
 	db := Connect()
 	defer db.Close()

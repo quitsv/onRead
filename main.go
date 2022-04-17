@@ -33,7 +33,9 @@ func main() {
 	router.HandleFunc("/books/{book_id}/buy", Controllers.BuyBook).Methods("POST")
   router.HandleFunc("/login", Controllers.Login).Methods("POST")                                                // Login User
 	router.HandleFunc("/logout", Controllers.Logout).Methods("POST")                                              // Logout User
-	router.HandleFunc("/register", Controllers.Register).Methods("POST")     
+	router.HandleFunc("/register", Controllers.Register).Methods("POST")                                          // Register User
+	router.HandleFunc("/books/{isbn}", Controllers.Authenticate(Controllers.ReadBook, 0)).Methods("GET")          // Read Book (user only)
+
 
 	//cors
 	corsHandler := cors.New(cors.Options{
