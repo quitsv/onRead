@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 	"strconv"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -322,7 +322,9 @@ func ReadBook(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		PrintError(404, "Anda tidak memiliki buku tersebut", w)
-    
+	}
+}
+
 func RateBook(w http.ResponseWriter, r *http.Request) {
 	db := Connect()
 	defer db.Close()
