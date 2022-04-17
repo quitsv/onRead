@@ -27,6 +27,7 @@ func main() {
 	router.HandleFunc("/bestSeller", Controllers.LookAllBestSellerBook).Methods("GET")                    // Get All Best Seller Book
 	router.HandleFunc("/bestSeller/{id_genre}", Controllers.LookAllBestSellerBookByGenre).Methods("GET")  // Get All Best Seller Book By Genre
 	router.HandleFunc("/searchBook/{judul}/{penulis}/{isbn}", Controllers.SearchBook).Methods("GET")      // Search Book By Parameters
+	router.HandleFunc("/books/{book_id}/rating", Controllers.RateBook).Methods("POST")                    // Rate Book
 	router.HandleFunc("/books/{book_id}/rent", Controllers.RentBook).Methods("POST")                      // Rent Book without Coupon
 
 	//cors
