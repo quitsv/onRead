@@ -263,7 +263,7 @@ func ReadBook(w http.ResponseWriter, r *http.Request) {
 	var transaksi Transaksi
 	var arrTransaksi []Transaksi
 
-	rows, err := db.Query("SELECT * FROM transaksi WHERE email = ? AND isbn = ?", email, isbn)
+	rows, err := db.Query("SELECT id_transaksi, jenis_transaksi, tanggal_transaksi, isbn, email FROM transaksi WHERE email = ? AND isbn = ?", email, isbn)
 
 	if err != nil {
 		fmt.Println(err)
@@ -271,7 +271,7 @@ func ReadBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for rows.Next() {
-		err := rows.Scan(&transaksi.IdTransaksi, &transaksi.NominalTransaksi, &transaksi.JenisTransaksi, &transaksi.TanggalTransaksi, &transaksi.Isbn, &transaksi.Email, &transaksi.Kupon)
+		err := rows.Scan(&transaksi.IdTransaksi, &transaksi.JenisTransaksi, &transaksi.TanggalTransaksi, &transaksi.Isbn, &transaksi.Email)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -284,15 +284,15 @@ func ReadBook(w http.ResponseWriter, r *http.Request) {
 	for i := 0; i < len(arrTransaksi); i++ {
 		if arrTransaksi[i].JenisTransaksi == "beli" {
 			haveBook = true
-			return
+			break
 		} else if arrTransaksi[i].JenisTransaksi == "sewa" && arrTransaksi[i].TanggalTransaksi.AddDate(0, 0, 30).After(time.Now()) {
 			haveBook = true
-			return
+			break
 		}
 	}
 
 	if haveBook {
-		rows, err := db.Query("SELECT path_file FROM buku WHERE isbn = ?", isbn)
+		rows, err := db.Query("SELECT * FROM buku WHERE isbn = ?", isbn)
 
 		if err != nil {
 			fmt.Println(err)
@@ -304,7 +304,8 @@ func ReadBook(w http.ResponseWriter, r *http.Request) {
 		var bukuResponse BukuResponse
 
 		for rows.Next() {
-			if err := rows.Scan(&buku.PathFile); err != nil {
+			if err := rows.Scan(&buku.Isbn, &buku.Judul, &buku.Penulis, &buku.Edisi, &buku.TahunCetak, &buku.Harga, &buku.PathFile); err != nil {
+				fmt.Println("err 2")
 				fmt.Println(err)
 			} else {
 				arrBuku = append(arrBuku, buku)
