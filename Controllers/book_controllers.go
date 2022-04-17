@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -247,4 +248,36 @@ func SearchBook(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+func RateBook(w http.ResponseWriter, r *http.Request) {
+	db := Connect()
+	defer db.Close()
+
+	vars := mux.Vars(r)
+	idBuku := vars["book_id"]
+
+	err := r.ParseForm()
+	if err != nil {
+		log.Println("GAGAL DISINI")
+		// log.Println(err)
+		// PrintError(400, "Rating Error", w)
+		return
+	}
+
+	ulasan := r.Form.Get("ulasan")
+	penilaian, _ := strconv.Atoi(r.Form.Get("penilaian"))
+
+	idUser := "agung@mail.com"
+
+	result, errQuery := db.Exec("insert into ulasanpenilaian(ulasan,penilaian,isbn,email) values (?, ?, ?, ?)", ulasan, penilaian, idBuku, idUser)
+	num, _ := result.RowsAffected()
+
+	if errQuery == nil {
+		if num != 0 {
+			PrintSuccess(200, "Rating Given", w)
+		} else {
+			PrintError(400, "Failed to Rate", w)
+		}
+	}
 }
