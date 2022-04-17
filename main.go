@@ -16,7 +16,6 @@ func main() {
 	router := mux.NewRouter()
 
 	//endpoints
-
 	router.HandleFunc("/books", Controllers.AddNewBook).Methods("POST")                                   //add new book
 	router.HandleFunc("/books", Controllers.GetDetailBook).Methods("GET")                                 //get detail book
 	router.HandleFunc("/books/{isbn}", Controllers.DeleteBook).Methods("DELETE")                          //delete book
@@ -32,6 +31,9 @@ func main() {
 	router.HandleFunc("/forum", Controllers.ViewForum).Methods("GET")                                     // View Forum
 	router.HandleFunc("/forum", Controllers.WriteForum).Methods("POST"
 	router.HandleFunc("/books/{book_id}/buy", Controllers.BuyBook).Methods("POST")
+  router.HandleFunc("/login", Controllers.Login).Methods("POST")                                                // Login User
+	router.HandleFunc("/logout", Controllers.Logout).Methods("POST")                                              // Logout User
+	router.HandleFunc("/register", Controllers.Register).Methods("POST")     
 
 	//cors
 	corsHandler := cors.New(cors.Options{
