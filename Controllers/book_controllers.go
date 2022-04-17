@@ -254,8 +254,6 @@ func RateBook(w http.ResponseWriter, r *http.Request) {
 	db := Connect()
 	defer db.Close()
 
-	log.Println("BERHASIL MASUK FUNCTION DAN BERHASIL CONNECT================================================================")
-
 	vars := mux.Vars(r)
 	idBuku := vars["book_id"]
 
@@ -267,25 +265,18 @@ func RateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("LEWATING PENGECEKKAN ERROR================================================================")
-
 	ulasan := r.Form.Get("ulasan")
 	penilaian, _ := strconv.Atoi(r.Form.Get("penilaian"))
 
 	idUser := "agung@mail.com"
 
-	log.Println("SEBELUM RESULT================================================================")
-
 	result, errQuery := db.Exec("insert into ulasanpenilaian(ulasan,penilaian,isbn,email) values (?, ?, ?, ?)", ulasan, penilaian, idBuku, idUser)
 	num, _ := result.RowsAffected()
-
-	log.Println("SESUDAH RESULT================================================================")
 
 	if errQuery == nil {
 		if num != 0 {
 			PrintSuccess(200, "Rating Given", w)
 		} else {
-			log.Println("GAGAL PADA PRINT ERROR================================================================")
 			PrintError(400, "Failed to Rate", w)
 		}
 	}
