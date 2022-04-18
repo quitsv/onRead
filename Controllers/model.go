@@ -124,3 +124,8 @@ type ForumResponse struct {
 type ArrForumResponse struct {
 	Data []Forum `json:"data"`
 }
+
+type User struct {
+	Email  string
+	Passwd string
+}

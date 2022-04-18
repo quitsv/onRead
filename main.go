@@ -13,6 +13,7 @@ import (
 )
 
 func main() {
+	Controllers.RunTools()
 	router := mux.NewRouter()
 
 	//endpoints
@@ -33,7 +34,7 @@ func main() {
 	router.HandleFunc("/books", Controllers.Authenticate(Controllers.AddNewBook, 1)).Methods("POST")                // add new book (admin only)
 	router.HandleFunc("/books/{isbn}", Controllers.Authenticate(Controllers.DeleteBook, 1)).Methods("DELETE")       // delete book (admin only)
 	router.HandleFunc("/books/{isbn}", Controllers.Authenticate(Controllers.UpdateBook, 1)).Methods("PUT")          // update book (admin only)
-  router.HandleFunc("/transaksi", Controllers.Authenticate(Controllers.GetAllTransactions, 1)).Methods("GET")     // get all transactions (admin only)
+	router.HandleFunc("/transaksi", Controllers.Authenticate(Controllers.GetAllTransactions, 1)).Methods("GET")     // get all transactions (admin only)
 	router.HandleFunc("/pengguna", Controllers.Authenticate(Controllers.DeleteUser, 1)).Methods("DELETE")           // delete user (admin only)
 
 	//cors
@@ -49,4 +50,5 @@ func main() {
 	fmt.Println("Server is running on port 8080")
 	log.Println("Server is running on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", Handler))
+
 }
