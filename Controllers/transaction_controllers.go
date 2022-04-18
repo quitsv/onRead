@@ -1,9 +1,9 @@
 package Controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"time"
 
@@ -17,25 +17,26 @@ func RentBook(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idBuku := vars["book_id"]
 
-	var isbn string
-	var judul string
-	var penulis string
-	var edisi int
-	var tahun_cetak time.Time
-	var harga int
+	idKupon := r.URL.Query()["kupon"]
 
-	var successResponse SuccessResponse
-	var failResponse ErrorResponse
+	var book Buku
+	var kupon Kupon
 
-	successResponse.Message = "Rent Success"
-	successResponse.Status = 200
+	messageSuccess := "Rent Success"
+	statusSuccess := 200
 
-	failResponse.Message = "Rent Failed"
-	failResponse.Status = 400
+	messageError := "Rent Failed"
+	statusError := 400
 
-	err := db.QueryRow("SELECT * FROM buku WHERE isbn = ?", idBuku).Scan(&isbn, &judul, &penulis, &edisi, &tahun_cetak, &harga)
+	err := db.QueryRow("SELECT harga FROM buku WHERE isbn = ?", idBuku).Scan(&book.Harga)
 	if err != nil {
 		log.Println(err)
+		return
+	}
+
+	errKupon := db.QueryRow("SELECT nominal,berlaku_sampai FROM kupon WHERE id_kupon = ?", idKupon[0]).Scan(&kupon.Nominal, &kupon.BerlakuSampai)
+	if errKupon != nil {
+		log.Println(errKupon)
 		return
 	}
 
@@ -49,14 +50,27 @@ func RentBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err2 := queryStatement.Exec(harga, 1, time.Now(), idBuku, email, -1)
-	if err2 != nil {
-		fmt.Println(err2)
-		json.NewEncoder(w).Encode(failResponse)
-		return
+	if len(idKupon) > 0 {
+		if kupon.BerlakuSampai.Before(time.Now()) {
+			_, err2 := queryStatement.Exec(book.Harga, 1, time.Now(), idBuku, email, 1)
+			if err2 != nil {
+				fmt.Println(err2)
+				PrintError(statusError, messageError, w)
+				return
+			}
+		} else {
+			hargaKupon := book.Harga - kupon.Nominal
+			_, err2 := queryStatement.Exec(hargaKupon, 1, time.Now(), idBuku, email, idKupon[0])
+			if err2 != nil {
+				fmt.Println(err2)
+				PrintError(statusError, messageError, w)
+				return
+			}
+		}
 	}
 
-	json.NewEncoder(w).Encode(successResponse)
+	PrintSuccess(statusSuccess, messageSuccess, w)
+	generateKupon(w, r)
 }
 
 func BuyBook(w http.ResponseWriter, r *http.Request) {
@@ -66,25 +80,26 @@ func BuyBook(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idBuku := vars["book_id"]
 
-	var isbn string
-	var judul string
-	var penulis string
-	var edisi int
-	var tahun_cetak time.Time
-	var harga int
+	var book Buku
+	var kupon Kupon
 
-	var successResponse SuccessResponse
-	var failResponse ErrorResponse
+	idKupon := r.URL.Query()["kupon"]
 
-	successResponse.Message = "Buy Success"
-	successResponse.Status = 200
+	messageSuccess := "Buy Success"
+	statusSuccess := 200
 
-	failResponse.Message = "Buy Failed"
-	failResponse.Status = 400
+	messageError := "Buy Failed"
+	statusError := 400
 
-	err := db.QueryRow("SELECT * FROM buku WHERE isbn = ?", idBuku).Scan(&isbn, &judul, &penulis, &edisi, &tahun_cetak, &harga)
+	err := db.QueryRow("SELECT harga FROM buku WHERE isbn = ?", idBuku).Scan(&book.Harga)
 	if err != nil {
 		log.Println(err)
+		return
+	}
+
+	errKupon := db.QueryRow("SELECT nominal,berlaku_sampai FROM kupon WHERE id_kupon = ?", idKupon[0]).Scan(&kupon.Nominal, &kupon.BerlakuSampai)
+	if errKupon != nil {
+		log.Println(errKupon)
 		return
 	}
 
@@ -98,12 +113,48 @@ func BuyBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err2 := queryStatement.Exec(harga, 2, time.Now(), idBuku, email, -1)
-	if err2 != nil {
-		fmt.Println(err2)
-		json.NewEncoder(w).Encode(failResponse)
+	if len(idKupon) > 0 {
+		if kupon.BerlakuSampai.Before(time.Now()) {
+			_, err2 := queryStatement.Exec(book.Harga, 2, time.Now(), idBuku, email, 1)
+			if err2 != nil {
+				fmt.Println(err2)
+				PrintError(statusError, messageError, w)
+				return
+			}
+		} else {
+			hargaKupon := book.Harga - kupon.Nominal
+			_, err2 := queryStatement.Exec(hargaKupon, 2, time.Now(), idBuku, email, idKupon[0])
+			if err2 != nil {
+				fmt.Println(err2)
+				PrintError(statusError, messageError, w)
+				return
+			}
+		}
+	}
+
+	PrintSuccess(statusSuccess, messageSuccess, w)
+	generateKupon(w, r)
+}
+
+func generateKupon(w http.ResponseWriter, r *http.Request) {
+	db := Connect()
+	defer db.Close()
+
+	randomNumber := rand.Intn(9)*1000 + 1000
+
+	_, email, _, _ := validateTokenFromCookies(r)
+
+	query := "INSERT INTO kupon(email,nominal,berlaku_sampai) VALUES (?,?,?)"
+	queryStatement, err := db.Prepare(query)
+
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
-	json.NewEncoder(w).Encode(successResponse)
+	_, err2 := queryStatement.Exec(email, randomNumber, time.Now().Add(time.Hour*24*7*30))
+	if err2 != nil {
+		fmt.Println(err2)
+		return
+	}
 }
