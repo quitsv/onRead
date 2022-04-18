@@ -30,6 +30,27 @@ func LookAllBookList(w http.ResponseWriter, r *http.Request) {
 		if err := rows.Scan(&book.Isbn, &book.Judul, &book.Penulis, &book.Edisi, &book.TahunCetak, &book.Harga); err != nil {
 			log.Fatal(err)
 		} else {
+			queryGenre := ("SELECT genrebuku.id_genre, tipegenre.genre from tipegenre join genrebuku on genrebuku.id_genre = tipegenre.id_genre where isbn = " + book.Isbn)
+
+			rows2, err := db.Query(queryGenre)
+			if err != nil {
+				log.Println(err)
+				PrintError(400, "Error Query Genre", w)
+			}
+
+			var genre Genre
+			var genres []Genre
+
+			for rows2.Next() {
+				if err := rows2.Scan(&genre.IdGenre, &genre.Genre); err != nil {
+					log.Fatal(err)
+					PrintError(400, "Error Fetching Genre", w)
+				} else {
+					genres = append(genres, genre)
+				}
+			}
+
+			book.Genre = genres
 			books = append(books, book)
 		}
 	}
