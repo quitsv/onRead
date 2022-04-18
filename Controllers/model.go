@@ -42,9 +42,28 @@ type Buku struct {
 	PathFile   string    `json:"path_file"`
 }
 
+type BestSeller struct {
+	Isbn             string  `json:"isbn`
+	Judul            string  `json:"judul`
+	Id_genre         int     `json:"id_genre`
+	Genre            string  `json:"genre`
+	Jumlah_penjualan int     `json:"jumlah`
+	Buku             []Buku  `json:"buku"`
+	Genres           []Genre `json:"genre"`
+}
+
+type BestSellerResponse struct {
+	Data []BestSeller `json:"data"`
+}
+
 type Genre struct {
 	IdGenre int    `json:"id_genre"`
 	Genre   string `json:"genre"`
+	Buku    []Buku `json:"buku"`
+}
+
+type GenreResponse struct {
+	Data []Genre `json:"data"`
 }
 
 type BukuResponse struct {
@@ -102,6 +121,7 @@ type Transaksi struct {
 	TanggalTransaksi time.Time `json:"tanggal_transaksi"`
 	JenisTransaksi   string    `json:"jenis_transaksi"`
 	NominalTransaksi int       `json:"nominal_transaksi"`
+	Buku             []Buku    `json:"buku"`
 	Kupon            NullInt64 `json:"kupon"`
 }
 

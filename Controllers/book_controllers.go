@@ -78,10 +78,9 @@ func LookAllBookListFilterByGenre(w http.ResponseWriter, r *http.Request) {
 	db := Connect()
 	defer db.Close()
 
-	vars := mux.Vars(r)
-	idGenre := vars["id_genre"]
+	idGenre := r.URL.Query()["id_genre"]
 
-	query := ("SELECT * from buku a join genrebuku b on a.isbn = b.isbn WHERE b.id_genre = " + idGenre)
+	query := ("SELECT * from buku a join genrebuku b on b.isbn = a.isbn")
 
 	rows, err := db.Query(query)
 	if err != nil {
@@ -95,6 +94,27 @@ func LookAllBookListFilterByGenre(w http.ResponseWriter, r *http.Request) {
 		if err := rows.Scan(&book.Isbn, &book.Judul, &book.Penulis, &book.Edisi, &book.TahunCetak, &book.Harga); err != nil {
 			log.Fatal(err)
 		} else {
+			queryGenre := ("SELECT genrebuku.id_genre, tipegenre.genre from tipegenre join genrebuku on genrebuku.id_genre = tipegenre.id_genre where genrebuku.id_genre = " + idGenre[0])
+
+			rows2, err := db.Query(queryGenre)
+			if err != nil {
+				log.Println(err)
+				PrintError(400, "Error Query Genre", w)
+			}
+
+			var genre Genre
+			var genres []Genre
+
+			for rows2.Next() {
+				if err := rows2.Scan(&genre.IdGenre, &genre.Genre); err != nil {
+					log.Fatal(err)
+					PrintError(400, "Error Fetching Genre", w)
+				} else {
+					genres = append(genres, genre)
+				}
+			}
+
+			book.Genre = genres
 			books = append(books, book)
 		}
 	}
@@ -190,70 +210,117 @@ func LookAllBestSellerBook(w http.ResponseWriter, r *http.Request) {
 	db := Connect()
 	defer db.Close()
 
-	query := "SELECT b.isbn,b.judul,b.penulis,b.edisi,b.tahun_cetak,b.harga from transaksi a join buku b on a.isbn = b.isbn group by a.isbn order by count(id_transaksi) DESC;"
+	idGenre := r.URL.Query()["genre"]
 
+	query := "SELECT * from view_penjualan_buku_per_genre "
+
+	if len(idGenre) > 0 {
+		query = query + " where genre = '" + idGenre[0] + "'"
+	}
+	query = query + "order by jumlah_penjualan DESC"
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Println(err)
 	}
 
-	var book Buku
-	var books []Buku
+	var bestSeller BestSeller
+	var bestSellers []BestSeller
 
-	n := 0
-
-	for rows.Next() && n < 5 {
-		if err := rows.Scan(&book.Isbn, &book.Judul, &book.Penulis, &book.Edisi, &book.TahunCetak, &book.Harga); err != nil {
+	for rows.Next() {
+		if err := rows.Scan(&bestSeller.Isbn, &bestSeller.Judul, &bestSeller.Id_genre, &bestSeller.Genre, &bestSeller.Jumlah_penjualan); err != nil {
 			log.Fatal(err)
+			PrintError(400, "Error Fetching Data", w)
 		} else {
-			books = append(books, book)
+			queryBuku := ("Select buku.isbn,buku.judul,buku.penulis,buku.edisi,buku.tahun_cetak,buku.harga from buku where isbn = '" + bestSeller.Isbn + "'")
+
+			rows2, err := db.Query(queryBuku)
+			if err != nil {
+				log.Println(err)
+				PrintError(400, "Error Query Book", w)
+			}
+
+			var book Buku
+			var books []Buku
+
+			for rows2.Next() {
+				if err := rows2.Scan(&book.Isbn, &book.Judul, &book.Penulis, &book.Edisi, &book.TahunCetak, &book.Harga); err != nil {
+					log.Fatal(err)
+					PrintError(400, "Error Fetching Book", w)
+				} else {
+					books = append(books, book)
+
+				}
+			}
+
+			bestSeller.Buku = books
+
+			queryGenre := ("Select tipegenre.id_genre,tipegenre.genre from tipegenre join genrebuku on tipegenre.id_genre = genrebuku.id_genre where genrebuku.isbn ='" + bestSeller.Isbn + "'")
+			rows3, err := db.Query(queryGenre)
+			if err != nil {
+				log.Println(err)
+				PrintError(400, "Error Query Book", w)
+			}
+
+			var genre Genre
+			var genres []Genre
+
+			for rows3.Next() {
+				if err := rows3.Scan(&genre.IdGenre, &genre.Genre); err != nil {
+					log.Fatal(err)
+					PrintError(400, "Error Fetching Book", w)
+				} else {
+					genres = append(genres, genre)
+
+				}
+			}
+			bestSeller.Genres = genres
+			bestSellers = append(bestSellers, bestSeller)
 		}
-		n++
 	}
 
-	var response ArrBukuResponse
+	var response BestSellerResponse
 
-	response.Data = books
+	response.Data = bestSellers
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 
-func LookAllBestSellerBookByGenre(w http.ResponseWriter, r *http.Request) {
-	db := Connect()
-	defer db.Close()
+// func LookAllBestSellerBookByGenre(w http.ResponseWriter, r *http.Request) {
+// 	db := Connect()
+// 	defer db.Close()
 
-	vars := mux.Vars(r)
-	idGenre := vars["id_genre"]
+// 	vars := mux.Vars(r)
+// 	idGenre := vars["id_genre"]
 
-	query := "SELECT b.isbn,b.judul,b.penulis,b.edisi,b.tahun_cetak,b.harga from transaksi a join buku b on a.isbn = b.isbn join genrebuku c on c.isbn = b.isbn WHERE c.id_genre =" + idGenre + " group by a.isbn order by count(id_transaksi) DESC"
+// 	query := "SELECT b.isbn,b.judul,b.penulis,b.edisi,b.tahun_cetak,b.harga from transaksi a join buku b on a.isbn = b.isbn join genrebuku c on c.isbn = b.isbn WHERE c.id_genre =" + idGenre + " group by a.isbn order by count(id_transaksi) DESC"
 
-	rows, err := db.Query(query)
-	if err != nil {
-		log.Println(err)
-	}
+// 	rows, err := db.Query(query)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
 
-	var book Buku
-	var books []Buku
+// 	var book Buku
+// 	var books []Buku
 
-	n := 0
+// 	n := 0
 
-	for rows.Next() && n < 5 {
-		if err := rows.Scan(&book.Isbn, &book.Judul, &book.Penulis, &book.Edisi, &book.TahunCetak, &book.Harga); err != nil {
-			log.Fatal(err)
-		} else {
-			books = append(books, book)
-		}
-		n++
-	}
+// 	for rows.Next() && n < 5 {
+// 		if err := rows.Scan(&book.Isbn, &book.Judul, &book.Penulis, &book.Edisi, &book.TahunCetak, &book.Harga); err != nil {
+// 			log.Fatal(err)
+// 		} else {
+// 			books = append(books, book)
+// 		}
+// 		n++
+// 	}
 
-	var response ArrBukuResponse
+// 	var response ArrBukuResponse
 
-	response.Data = books
+// 	response.Data = books
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
-}
+// 	w.Header().Set("Content-Type", "application/json")
+// 	json.NewEncoder(w).Encode(response)
+// }
 
 // func SearchBook(w http.ResponseWriter, r *http.Request) {
 // 	db := Connect()
