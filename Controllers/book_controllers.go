@@ -79,9 +79,11 @@ func GetDetailBook(w http.ResponseWriter, r *http.Request) {
 	db := Connect()
 	defer db.Close()
 
-	isbn := r.URL.Query()["isbn"]
+	vars := mux.Vars(r)
 
-	queryBuku := ("SELECT * from buku where isbn = " + isbn[0])
+	isbn := vars["isbn"]
+
+	queryBuku := ("SELECT * from buku where isbn = " + isbn)
 
 	rows, err := db.Query(queryBuku)
 	if err != nil {
@@ -97,7 +99,7 @@ func GetDetailBook(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 			PrintError(400, "Error Fetching Data", w)
 		} else {
-			queryGenre := ("SELECT genrebuku.id_genre, tipegenre.genre from tipegenre join genrebuku on genrebuku.id_genre = tipegenre.id_genre where genrebuku.isbn = " + isbn[0])
+			queryGenre := ("SELECT genrebuku.id_genre, tipegenre.genre from tipegenre join genrebuku on genrebuku.id_genre = tipegenre.id_genre where genrebuku.isbn = " + isbn)
 
 			rows2, err := db.Query(queryGenre)
 			if err != nil {
@@ -119,7 +121,7 @@ func GetDetailBook(w http.ResponseWriter, r *http.Request) {
 
 			book.Genre = genres
 
-			queryUlasan := ("select ulasan, penilaian, isbn, email from ulasanpenilaian where isbn = " + isbn[0])
+			queryUlasan := ("select ulasan, penilaian, isbn, email from ulasanpenilaian where isbn = " + isbn)
 
 			rows3, err := db.Query(queryUlasan)
 			if err != nil {

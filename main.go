@@ -17,7 +17,7 @@ func main() {
 
 	//endpoints
 	router.HandleFunc("/books", Controllers.Authenticate(Controllers.AddNewBook, 1)).Methods("POST")                //add new book (admin only)
-	router.HandleFunc("/books", Controllers.GetDetailBook).Methods("GET")                                           //get detail book (admin only)
+	router.HandleFunc("/books/{isbn}", Controllers.GetDetailBook).Methods("GET")                                    //get detail book
 	router.HandleFunc("/books/{isbn}", Controllers.Authenticate(Controllers.DeleteBook, 1)).Methods("DELETE")       //delete book (admin only)
 	router.HandleFunc("/books/{isbn}", Controllers.Authenticate(Controllers.UpdateBook, 1)).Methods("PUT")          //update book (admin only)
 	router.HandleFunc("/pengguna", Controllers.Authenticate(Controllers.DeleteUser, 1)).Methods("DELETE")           //delete user (admin only)
