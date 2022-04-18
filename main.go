@@ -22,7 +22,6 @@ func main() {
 	router.HandleFunc("/users/register", Controllers.Register).Methods("POST")                                      // Register User
 	router.HandleFunc("/books", Controllers.SearchBook).Methods("GET")                                              // Get List Book by Param
 	router.HandleFunc("/books/bestsellers", Controllers.LookAllBestSellerBook).Methods("GET")                       // Get All Best Seller Book
-	router.HandleFunc("/books/bestsellers/{id_genre}", Controllers.LookAllBestSellerBookByGenre).Methods("GET")     // Get All Best Seller Book By Genre
 	router.HandleFunc("/books/{isbn}", Controllers.GetDetailBook).Methods("GET")                                    // get detail book
 	router.HandleFunc("/books/{book_id}/rating", Controllers.Authenticate(Controllers.RateBook, 0)).Methods("POST") // Rate Book (user only)
 	router.HandleFunc("/books/{book_id}/rent", Controllers.Authenticate(Controllers.RentBook, 0)).Methods("POST")   // Rent Book (user only)
