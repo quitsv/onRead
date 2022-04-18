@@ -39,7 +39,7 @@ func RentBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	idUser := "agung@mail.com"
+	_, email, _, _ := validateTokenFromCookies(r)
 
 	query := "INSERT INTO transaksi(nominal_transaksi,jenis_transaksi,tanggal_transaksi,isbn,email,kupon) VALUES (?,?,?,?,?,?)"
 	queryStatement, err := db.Prepare(query)
@@ -49,7 +49,7 @@ func RentBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err2 := queryStatement.Exec(harga, 1, time.Now(), idBuku, idUser, -1)
+	_, err2 := queryStatement.Exec(harga, 1, time.Now(), idBuku, email, -1)
 	if err2 != nil {
 		fmt.Println(err2)
 		json.NewEncoder(w).Encode(failResponse)
@@ -88,7 +88,7 @@ func BuyBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	idUser := "agung@mail.com"
+	_, email, _, _ := validateTokenFromCookies(r)
 
 	query := "INSERT INTO transaksi(nominal_transaksi,jenis_transaksi,tanggal_transaksi,isbn,email,kupon) VALUES (?,?,?,?,?,?)"
 	queryStatement, err := db.Prepare(query)
@@ -98,7 +98,7 @@ func BuyBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err2 := queryStatement.Exec(harga, 2, time.Now(), idBuku, idUser, -1)
+	_, err2 := queryStatement.Exec(harga, 2, time.Now(), idBuku, email, -1)
 	if err2 != nil {
 		fmt.Println(err2)
 		json.NewEncoder(w).Encode(failResponse)
