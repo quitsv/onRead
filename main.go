@@ -16,16 +16,16 @@ func main() {
 	router := mux.NewRouter()
 
 	//endpoints
-	router.HandleFunc("/books", Controllers.Authenticate(Controllers.AddNewBook, 1)).Methods("POST")                //add new book (admin only)
-	router.HandleFunc("/books/{isbn}", Controllers.GetDetailBook).Methods("GET")                                    //get detail book
-	router.HandleFunc("/books/{isbn}", Controllers.Authenticate(Controllers.DeleteBook, 1)).Methods("DELETE")       //delete book (admin only)
-	router.HandleFunc("/books/{isbn}", Controllers.Authenticate(Controllers.UpdateBook, 1)).Methods("PUT")          //update book (admin only)
-	router.HandleFunc("/pengguna", Controllers.Authenticate(Controllers.DeleteUser, 1)).Methods("DELETE")           //delete user (admin only)
-	router.HandleFunc("/books", Controllers.LookAllBookList).Methods("GET")                                         // Get All List Book
-	router.HandleFunc("/booksFilter/{id_genre}", Controllers.LookAllBookListFilterByGenre).Methods("GET")           // Get All List Book by genre
-	router.HandleFunc("/bestSeller", Controllers.LookAllBestSellerBook).Methods("GET")                              // Get All Best Seller Book
-	router.HandleFunc("/bestSeller/{id_genre}", Controllers.LookAllBestSellerBookByGenre).Methods("GET")            // Get All Best Seller Book By Genre
-	router.HandleFunc("/searchBook/{judul}/{penulis}/{isbn}", Controllers.SearchBook).Methods("GET")                // Search Book By Parameters
+	router.HandleFunc("/books", Controllers.Authenticate(Controllers.AddNewBook, 1)).Methods("POST")          //add new book (admin only)
+	router.HandleFunc("/books/{isbn}", Controllers.GetDetailBook).Methods("GET")                              //get detail book
+	router.HandleFunc("/books/{isbn}", Controllers.Authenticate(Controllers.DeleteBook, 1)).Methods("DELETE") //delete book (admin only)
+	router.HandleFunc("/books/{isbn}", Controllers.Authenticate(Controllers.UpdateBook, 1)).Methods("PUT")    //update book (admin only)
+	router.HandleFunc("/pengguna", Controllers.Authenticate(Controllers.DeleteUser, 1)).Methods("DELETE")     //delete user (admin only)
+	router.HandleFunc("/books", Controllers.SearchBook).Methods("GET")                                        // Get List Book by Param
+	router.HandleFunc("/booksFilter/{id_genre}", Controllers.LookAllBookListFilterByGenre).Methods("GET")     // Get All List Book by genre
+	router.HandleFunc("/bestSeller", Controllers.LookAllBestSellerBook).Methods("GET")                        // Get All Best Seller Book
+	router.HandleFunc("/bestSeller/{id_genre}", Controllers.LookAllBestSellerBookByGenre).Methods("GET")      // Get All Best Seller Book By Genre
+	// router.HandleFunc("/searchBook/{judul}/{penulis}/{isbn}", Controllers.SearchBook).Methods("GET")                // Search Book By Parameters
 	router.HandleFunc("/books/{book_id}/rating", Controllers.Authenticate(Controllers.RateBook, 0)).Methods("POST") // Rate Book (user only)
 	router.HandleFunc("/books/{book_id}/rent", Controllers.Authenticate(Controllers.RentBook, 0)).Methods("POST")   // Rent Book (user only)
 	router.HandleFunc("/forum", Controllers.ViewForum).Methods("GET")                                               // View Forum
