@@ -18,6 +18,17 @@ func LookAllBookList(w http.ResponseWriter, r *http.Request) {
 
 	query := "SELECT * FROM buku"
 
+	isbn := r.URL.Query()["isbn"]
+	judul := r.URL.Query()["judul"]
+
+	if len(isbn) > 0 && len(judul) > 0 {
+		query = query + " WHERE isbn = " + isbn[0] + " AND judul = '" + judul[0] + "'"
+	} else if len(isbn) > 0 {
+		query = query + " WHERE isbn = " + isbn[0]
+	} else if len(judul) > 0 {
+		query = query + " WHERE judul like '%" + judul[0] + "%'"
+	}
+
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Println(err)
@@ -244,34 +255,34 @@ func LookAllBestSellerBookByGenre(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func SearchBook(w http.ResponseWriter, r *http.Request) {
-	db := Connect()
-	defer db.Close()
+// func SearchBook(w http.ResponseWriter, r *http.Request) {
+// 	db := Connect()
+// 	defer db.Close()
 
-	judul := r.Form.Get("judul")
-	penulis := r.Form.Get("penulis")
-	isbn := r.Form.Get("isbn")
+// 	judul := r.Form.Get("judul")
+// 	penulis := r.Form.Get("penulis")
+// 	isbn := r.Form.Get("isbn")
 
-	query := ("Select * from buku where judul =" + judul + " , penulis = " + penulis + " , isbn =" + isbn)
+// 	query := ("Select * from buku where judul =" + judul + " , penulis = " + penulis + " , isbn =" + isbn)
 
-	rows, err := db.Query(query)
-	if err != nil {
-		log.Println(err)
-	}
+// 	rows, err := db.Query(query)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
 
-	var book Buku
+// 	var book Buku
 
-	if err := rows.Scan(&book.Isbn, &book.Judul, &book.Penulis, &book.Edisi, &book.TahunCetak, &book.Harga); err != nil {
-		log.Fatal(err)
-	}
+// 	if err := rows.Scan(&book.Isbn, &book.Judul, &book.Penulis, &book.Edisi, &book.TahunCetak, &book.Harga); err != nil {
+// 		log.Fatal(err)
+// 	}
 
-	var response BukuResponse
+// 	var response BukuResponse
 
-	response.Data = book
+// 	response.Data = book
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
-}
+// 	w.Header().Set("Content-Type", "application/json")
+// 	json.NewEncoder(w).Encode(response)
+// }
 
 func ReadBook(w http.ResponseWriter, r *http.Request) {
 	db := Connect()
