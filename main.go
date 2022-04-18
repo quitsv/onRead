@@ -21,6 +21,7 @@ func main() {
 	router.HandleFunc("/books/{isbn}", Controllers.Authenticate(Controllers.DeleteBook, 1)).Methods("DELETE")       //delete book (admin only)
 	router.HandleFunc("/books/{isbn}", Controllers.Authenticate(Controllers.UpdateBook, 1)).Methods("PUT")          //update book (admin only)
 	router.HandleFunc("/pengguna", Controllers.Authenticate(Controllers.DeleteUser, 1)).Methods("DELETE")           //delete user (admin only)
+	router.HandleFunc("/transaksi", Controllers.Authenticate(Controllers.GetAllTransactions, 1)).Methods("GET")     //get all transactions (admin only)
 	router.HandleFunc("/books", Controllers.LookAllBookList).Methods("GET")                                         // Get All List Book
 	router.HandleFunc("/booksFilter/{id_genre}", Controllers.LookAllBookListFilterByGenre).Methods("GET")           // Get All List Book by genre
 	router.HandleFunc("/bestSeller", Controllers.LookAllBestSellerBook).Methods("GET")                              // Get All Best Seller Book
