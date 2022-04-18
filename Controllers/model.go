@@ -40,11 +40,11 @@ type Buku struct {
 }
 
 type BestSeller struct {
-	Isbn             string  `json:"isbn`
-	Judul            string  `json:"judul`
-	Id_genre         int     `json:"id_genre`
-	Genre            string  `json:"genre`
-	Jumlah_penjualan int     `json:"jumlah`
+	Isbn             string  `json:"isbn"`
+	Judul            string  `json:"judul"`
+	Id_genre         int     `json:"id_genre"`
+	Genre            string  `json:"genre"`
+	Jumlah_penjualan int     `json:"jumlah"`
 	Buku             []Buku  `json:"buku"`
 	Genres           []Genre `json:"genre"`
 }
