@@ -1,11 +1,8 @@
 package Controllers
 
 import (
-	"database/sql"
 	"time"
 )
-
-type NullInt64 sql.NullInt64
 
 type SuccessResponse struct {
 	Status  int    `json:"status"`
@@ -105,9 +102,10 @@ type DetailBukuResponse struct {
 }
 
 type Kupon struct {
-	Kode          int       `json:"kode"`
-	BerlakuSampai time.Time `json:"berlaku_sampai"`
+	IdKupon       string    `json:"id_kupon"`
+	Email         string    `json:"email"`
 	Nominal       int       `json:"nominal"`
+	BerlakuSampai time.Time `json:"berlaku_sampai"`
 }
 
 type KuponResponse struct {
@@ -121,8 +119,7 @@ type Transaksi struct {
 	TanggalTransaksi time.Time `json:"tanggal_transaksi"`
 	JenisTransaksi   string    `json:"jenis_transaksi"`
 	NominalTransaksi int       `json:"nominal_transaksi"`
-	Buku             []Buku    `json:"buku"`
-	Kupon            NullInt64 `json:"kupon"`
+	Kupon            int       `json:"kupon"`
 }
 
 type TransaksiResponse struct {

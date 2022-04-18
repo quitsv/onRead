@@ -455,3 +455,82 @@ func RateBook(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+func SearchBook(w http.ResponseWriter, r *http.Request) {
+	db := Connect()
+	defer db.Close()
+
+	var buku Buku
+	var arrBuku []Buku
+
+	isbn := r.URL.Query()["isbn"]
+	judul := r.URL.Query()["judul"]
+	genre := r.URL.Query()["genre"]
+
+	queryStm := "SELECT * FROM buku"
+
+	if len(isbn) > 0 && len(judul) > 0 && len(genre) > 0 {
+		queryStm = "SELECT a.isbn, a.judul, a.penulis, a.edisi, a.tahun_cetak, a.harga, a.path_file FROM buku a JOIN genrebuku b ON a.isbn=b.isbn JOIN tipegenre c ON b.id_genre=c.id_genre WHERE b.id_genre=" + genre[0] + " AND a.isbn='" + isbn[0] + "' AND a.judul LIKE '%" + judul[0] + "%'"
+	} else if len(isbn) > 0 && len(judul) > 0 {
+		queryStm = "SELECT isbn, judul, penulis, edisi, tahun_cetak, harga, path_file FROM buku WHERE isbn='" + isbn[0] + "' AND judul LIKE '%" + judul[0] + "%'"
+	} else if len(isbn) > 0 && len(genre) > 0 {
+		queryStm = "SELECT a.isbn, a.judul, a.penulis, a.edisi, a.tahun_cetak, a.harga, a.path_file FROM buku a JOIN genrebuku b ON a.isbn=b.isbn JOIN tipegenre c ON b.id_genre=c.id_genre WHERE b.id_genre=" + genre[0] + " AND a.isbn='" + isbn[0] + "'"
+	} else if len(judul) > 0 && len(genre) > 0 {
+		queryStm = "SELECT a.isbn, a.judul, a.penulis, a.edisi, a.tahun_cetak, a.harga, a.path_file FROM buku a JOIN genrebuku b ON a.isbn=b.isbn JOIN tipegenre c ON b.id_genre=c.id_genre WHERE b.id_genre=" + genre[0] + " AND a.judul LIKE '%" + judul[0] + "%'"
+	} else if len(isbn) > 0 {
+		queryStm = "SELECT isbn, judul, penulis, edisi, tahun_cetak, harga, path_file FROM buku WHERE isbn='" + isbn[0] + "'"
+	} else if len(judul) > 0 {
+		queryStm = "SELECT isbn, judul, penulis, edisi, tahun_cetak, harga, path_file FROM buku WHERE judul LIKE '%" + judul[0] + "%'"
+	} else if len(genre) > 0 {
+		queryStm = "SELECT a.isbn, a.judul, a.penulis, a.edisi, a.tahun_cetak, a.harga, a.path_file FROM buku a JOIN genrebuku b ON a.isbn=b.isbn JOIN tipegenre c ON b.id_genre=c.id_genre WHERE b.id_genre=" + genre[0]
+	}
+
+	rows, err := db.Query(queryStm)
+
+	if err != nil {
+		fmt.Println("a:", err)
+		return
+	}
+
+	for rows.Next() {
+		err := rows.Scan(&buku.Isbn, &buku.Judul, &buku.Penulis, &buku.Edisi, &buku.TahunCetak, &buku.Harga, &buku.PathFile)
+		if err != nil {
+			fmt.Println("b:", err)
+			return
+		} else {
+			rows2, err2 := db.Query("SELECT a.id_genre, a.genre FROM tipegenre a JOIN genrebuku b ON a.id_genre=b.id_genre WHERE b.isbn='" + buku.Isbn + "'")
+
+			if err2 != nil {
+				fmt.Println("c:", err, buku.Isbn)
+				return
+			}
+
+			var genre Genre
+			var arrGenre []Genre
+
+			for rows2.Next() {
+				err := rows2.Scan(&genre.IdGenre, &genre.Genre)
+
+				if err != nil {
+					fmt.Println("d:", err)
+					return
+				} else {
+					arrGenre = append(arrGenre, genre)
+				}
+			}
+			buku.Genre = arrGenre
+			arrBuku = append(arrBuku, buku)
+		}
+
+	}
+
+	var arrBukuResponse ArrBukuResponse
+	arrBukuResponse.Data = arrBuku
+
+	if len(arrBukuResponse.Data) > 0 {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(arrBukuResponse)
+	} else {
+		PrintError(400, "Tidak ada data", w)
+	}
+}
