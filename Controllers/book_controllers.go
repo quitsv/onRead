@@ -242,8 +242,6 @@ func SearchBook(w http.ResponseWriter, r *http.Request) {
 
 	if err := rows.Scan(&book.Isbn, &book.Judul, &book.Penulis, &book.Edisi, &book.TahunCetak, &book.Harga); err != nil {
 		log.Fatal(err)
-	} else {
-		book = book
 	}
 
 	var response BukuResponse

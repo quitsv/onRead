@@ -22,7 +22,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	password := r.Form.Get("password")
 	tipe := 0
 
-	result, errQuery := db.Exec("insert into pengguna (email, nama, password, tipe) values (?,?, ?, ?, ?, ?)", email, nama, password, tipe)
+	result, errQuery := db.Exec("insert into pengguna (email, nama, password, tipe) values (?,?, ?, ?)", email, nama, password, tipe)
 
 	num, _ := result.RowsAffected()
 
