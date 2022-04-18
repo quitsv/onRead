@@ -96,7 +96,7 @@ func getSender() User {
 	var sender User
 
 	sender.Email = os.Getenv("EMAIL")
-	sender.Passwd = os.Getenv("PASSWD")
+	sender.Passwd = os.Getenv("PASSWORD")
 
 	return sender
 }
