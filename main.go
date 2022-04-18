@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	Controllers.RunTools()
+	go Controllers.RunTools()
 	router := mux.NewRouter()
 
 	//endpoints

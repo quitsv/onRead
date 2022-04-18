@@ -32,7 +32,7 @@ func GetDetailBook(w http.ResponseWriter, r *http.Request) {
 	var books []DetailBuku
 
 	for rows.Next() {
-		if err := rows.Scan(&book.Isbn, &book.Judul, &book.Penulis, &book.Edisi, &book.TahunCetak, &book.Harga); err != nil {
+		if err := rows.Scan(&book.Isbn, &book.Judul, &book.Penulis, &book.Edisi, &book.TahunCetak, &book.Harga, &book.PathFile); err != nil {
 			log.Fatal(err)
 			PrintError(400, "Error Fetching Data", w)
 		} else {
@@ -95,25 +95,65 @@ func LookAllBestSellerBook(w http.ResponseWriter, r *http.Request) {
 	db := Connect()
 	defer db.Close()
 
-	query := "SELECT b.isbn,b.judul,b.penulis,b.edisi,b.tahun_cetak,b.harga from transaksi a join buku b on a.isbn = b.isbn group by a.isbn order by count(id_transaksi) DESC;"
+	idGenre := r.URL.Query()["genre"]
 
+	query := "SELECT isbn, judul, id_genre, jumlah_penjualan from view_penjualan_buku_per_genre "
+
+	if len(idGenre) > 0 {
+		query = query + " where genre = '" + idGenre[0] + "'"
+	}
+	query = query + "order by jumlah_penjualan DESC"
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Println(err)
 	}
 
+	var bestSeller BestSeller
 	var book Buku
 	var books []Buku
-
-	n := 0
-
-	for rows.Next() && n < 5 {
-		if err := rows.Scan(&book.Isbn, &book.Judul, &book.Penulis, &book.Edisi, &book.TahunCetak, &book.Harga); err != nil {
+	for rows.Next() {
+		if err := rows.Scan(&bestSeller.Isbn, &bestSeller.Judul, &bestSeller.Id_genre, &bestSeller.Jumlah_penjualan); err != nil {
 			log.Fatal(err)
+			PrintError(400, "Error Fetching Data", w)
 		} else {
-			books = append(books, book)
+			queryBuku := ("Select buku.isbn,buku.judul,buku.penulis,buku.edisi,buku.tahun_cetak,buku.harga, buku.path_file from buku where isbn = '" + bestSeller.Isbn + "'")
+
+			rows2, err := db.Query(queryBuku)
+
+			if err != nil {
+				log.Println(err)
+				PrintError(400, "Error Query Book", w)
+			}
+
+			for rows2.Next() {
+				if err := rows2.Scan(&book.Isbn, &book.Judul, &book.Penulis, &book.Edisi, &book.TahunCetak, &book.Harga, &book.PathFile); err != nil {
+					log.Fatal(err)
+					PrintError(400, "Error Fetching Book", w)
+				} else {
+					queryGenre := ("Select tipegenre.id_genre,tipegenre.genre from tipegenre join genrebuku on tipegenre.id_genre = genrebuku.id_genre where genrebuku.isbn ='" + bestSeller.Isbn + "'")
+					rows3, err := db.Query(queryGenre)
+					if err != nil {
+						log.Println(err)
+						PrintError(400, "Error Query Book", w)
+					}
+
+					var genre Genre
+					var genres []Genre
+
+					for rows3.Next() {
+						if err := rows3.Scan(&genre.IdGenre, &genre.Genre); err != nil {
+							log.Fatal(err)
+							PrintError(400, "Error Fetching Book", w)
+						} else {
+							genres = append(genres, genre)
+
+						}
+					}
+					book.Genre = genres
+					books = append(books, book)
+				}
+			}
 		}
-		n++
 	}
 
 	var response ArrBukuResponse
@@ -206,18 +246,17 @@ func RateBook(w http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseForm()
 	if err != nil {
-		log.Println("GAGAL DISINI")
-		// log.Println(err)
-		// PrintError(400, "Rating Error", w)
+		log.Println(err)
+		PrintError(400, "Rating Error", w)
 		return
 	}
 
 	ulasan := r.Form.Get("ulasan")
 	penilaian, _ := strconv.Atoi(r.Form.Get("penilaian"))
 
-	idUser := "agung@mail.com"
+	_, email, _, _ := validateTokenFromCookies(r)
 
-	result, errQuery := db.Exec("insert into ulasanpenilaian(ulasan,penilaian,isbn,email) values (?, ?, ?, ?)", ulasan, penilaian, idBuku, idUser)
+	result, errQuery := db.Exec("insert into ulasanpenilaian(ulasan,penilaian,isbn,email) values (?, ?, ?, ?)", ulasan, penilaian, idBuku, email)
 	num, _ := result.RowsAffected()
 
 	if errQuery == nil {
