@@ -16,7 +16,6 @@ func main() {
 	router := mux.NewRouter()
 
 	//endpoints
-
 	router.HandleFunc("/users/login", Controllers.Login).Methods("POST")                                            // Login User
 	router.HandleFunc("/users/logout", Controllers.Logout).Methods("POST")                                          // Logout User
 	router.HandleFunc("/users/register", Controllers.Register).Methods("POST")                                      // Register User

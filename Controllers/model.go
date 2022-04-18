@@ -83,9 +83,10 @@ type DetailBukuResponse struct {
 }
 
 type Kupon struct {
-	Kode          int       `json:"kode"`
-	BerlakuSampai time.Time `json:"berlaku_sampai"`
+	IdKupon       string    `json:"id_kupon"`
+	Email         string    `json:"email"`
 	Nominal       int       `json:"nominal"`
+	BerlakuSampai time.Time `json:"berlaku_sampai"`
 }
 
 type KuponResponse struct {
