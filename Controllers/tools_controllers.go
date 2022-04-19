@@ -44,7 +44,7 @@ func RunTools() {
 
 	gocron := gocron.NewScheduler(time.UTC)
 
-	gocron.Every(1).Month().Do(func() {
+	gocron.Every(1).MonthLastDay().Do(func() {
 		query := "SELECT email, nama FROM pengguna where tipe = 0"
 
 		rows, err := db.Query(query)

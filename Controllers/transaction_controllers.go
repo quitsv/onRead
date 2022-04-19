@@ -53,14 +53,27 @@ func RentBook(w http.ResponseWriter, r *http.Request) {
 
 	if len(idKupon) > 0 {
 		if kupon.BerlakuSampai.Before(time.Now()) {
-			_, err2 := queryStatement.Exec(book.Harga, "Sewa", time.Now(), idBuku, email, 1)
+			_, err2 := queryStatement.Exec(book.Harga*3/10, "Sewa", time.Now(), idBuku, email, 1)
 			if err2 != nil {
 				fmt.Println(err2)
 				PrintError(statusError, messageError, w)
 				return
 			}
 		} else {
-			hargaKupon := book.Harga - kupon.Nominal
+			hargaKupon := book.Harga*3/10 - kupon.Nominal
+			queryKupon := "UPDATE kupon SET berlaku_sampai = ? WHERE id_kupon = ?"
+			queryKuponStatement, errKupon := db.Prepare(queryKupon)
+			if errKupon != nil {
+				fmt.Println(errKupon)
+				return
+			}
+			_, errKuponExec := queryKuponStatement.Exec(time.Now().AddDate(0, 0, -1), idKupon[0])
+			if errKuponExec != nil {
+				fmt.Println(errKuponExec)
+				PrintError(statusError, messageError, w)
+				return
+			}
+
 			_, err2 := queryStatement.Exec(hargaKupon, "Sewa", time.Now(), idBuku, email, idKupon[0])
 			if err2 != nil {
 				fmt.Println(err2)
@@ -124,6 +137,19 @@ func BuyBook(w http.ResponseWriter, r *http.Request) {
 			}
 		} else {
 			hargaKupon := book.Harga - kupon.Nominal
+			queryKupon := "UPDATE kupon SET berlaku_sampai = ? WHERE id_kupon = ?"
+			queryKuponStatement, errKupon := db.Prepare(queryKupon)
+			if errKupon != nil {
+				fmt.Println(errKupon)
+				return
+			}
+			_, errKuponExec := queryKuponStatement.Exec(time.Now().AddDate(0, 0, -1), idKupon[0])
+			if errKuponExec != nil {
+				fmt.Println(errKuponExec)
+				PrintError(statusError, messageError, w)
+				return
+			}
+
 			_, err2 := queryStatement.Exec(hargaKupon, "Beli", time.Now(), idBuku, email, idKupon[0])
 			if err2 != nil {
 				fmt.Println(err2)
