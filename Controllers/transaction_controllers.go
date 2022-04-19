@@ -53,7 +53,7 @@ func RentBook(w http.ResponseWriter, r *http.Request) {
 
 	if len(idKupon) > 0 {
 		if kupon.BerlakuSampai.Before(time.Now()) {
-			_, err2 := queryStatement.Exec(book.Harga, 1, time.Now(), idBuku, email, 1)
+			_, err2 := queryStatement.Exec(book.Harga, "Sewa", time.Now(), idBuku, email, 1)
 			if err2 != nil {
 				fmt.Println(err2)
 				PrintError(statusError, messageError, w)
@@ -61,7 +61,7 @@ func RentBook(w http.ResponseWriter, r *http.Request) {
 			}
 		} else {
 			hargaKupon := book.Harga - kupon.Nominal
-			_, err2 := queryStatement.Exec(hargaKupon, 1, time.Now(), idBuku, email, idKupon[0])
+			_, err2 := queryStatement.Exec(hargaKupon, "Sewa", time.Now(), idBuku, email, idKupon[0])
 			if err2 != nil {
 				fmt.Println(err2)
 				PrintError(statusError, messageError, w)
@@ -116,7 +116,7 @@ func BuyBook(w http.ResponseWriter, r *http.Request) {
 
 	if len(idKupon) > 0 {
 		if kupon.BerlakuSampai.Before(time.Now()) {
-			_, err2 := queryStatement.Exec(book.Harga, 2, time.Now(), idBuku, email, 1)
+			_, err2 := queryStatement.Exec(book.Harga, "Beli", time.Now(), idBuku, email, 1)
 			if err2 != nil {
 				fmt.Println(err2)
 				PrintError(statusError, messageError, w)
@@ -124,7 +124,7 @@ func BuyBook(w http.ResponseWriter, r *http.Request) {
 			}
 		} else {
 			hargaKupon := book.Harga - kupon.Nominal
-			_, err2 := queryStatement.Exec(hargaKupon, 2, time.Now(), idBuku, email, idKupon[0])
+			_, err2 := queryStatement.Exec(hargaKupon, "Beli", time.Now(), idBuku, email, idKupon[0])
 			if err2 != nil {
 				fmt.Println(err2)
 				PrintError(statusError, messageError, w)
