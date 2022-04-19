@@ -25,8 +25,9 @@ func AddNewBook(w http.ResponseWriter, r *http.Request) {
 	edisi := r.Form.Get("edisi")
 	tahun_cetak := r.Form.Get("tahun_cetak")
 	harga := r.Form.Get("harga")
+	pathFile := r.Form.Get("path")
 
-	result, errQuery := db.Exec("insert into buku (isbn, judul, penulis, edisi, tahun_cetak, harga) values (?, ?, ?, ?, ?, ?)", isbn, judul, penulis, edisi, tahun_cetak, harga)
+	result, errQuery := db.Exec("insert into buku (isbn, judul, penulis, edisi, tahun_cetak, harga, path_file) values (?, ?, ?, ?, ?, ?, ?)", isbn, judul, penulis, edisi, tahun_cetak, harga, pathFile)
 
 	num, _ := result.RowsAffected()
 	if errQuery == nil {
@@ -109,7 +110,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	email := r.URL.Query()["email"]
 
-	result, errQuery := db.Exec("delete from pengguna where email = ?", email[0])
+	result, errQuery := db.Exec("update pengguna set tipe=-1 where email = ?", email[0])
 
 	num, _ := result.RowsAffected()
 

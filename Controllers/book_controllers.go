@@ -97,12 +97,14 @@ func LookAllBestSellerBook(w http.ResponseWriter, r *http.Request) {
 
 	idGenre := r.URL.Query()["genre"]
 
-	query := "SELECT isbn, judul, id_genre, jumlah_penjualan from view_penjualan_buku_per_genre "
+	query := "select a.isbn, a.jumlah_penjualan from ( "
+	query = query + "SELECT isbn, judul, id_genre, jumlah_penjualan from view_penjualan_buku_per_genre "
 
 	if len(idGenre) > 0 {
 		query = query + " where genre = '" + idGenre[0] + "'"
 	}
-	query = query + "order by jumlah_penjualan DESC"
+	query = query + " ) a group by a.isbn "
+	query = query + "order by a.jumlah_penjualan DESC"
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Println(err)
@@ -112,7 +114,7 @@ func LookAllBestSellerBook(w http.ResponseWriter, r *http.Request) {
 	var book Buku
 	var books []Buku
 	for rows.Next() {
-		if err := rows.Scan(&bestSeller.Isbn, &bestSeller.Judul, &bestSeller.Id_genre, &bestSeller.Jumlah_penjualan); err != nil {
+		if err := rows.Scan(&bestSeller.Isbn, &bestSeller.Jumlah_penjualan); err != nil {
 			log.Fatal(err)
 			PrintError(400, "Error Fetching Data", w)
 		} else {

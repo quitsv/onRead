@@ -50,7 +50,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
 
-	result, err := db.Query("select * from pengguna where email = ? and password = ?", email, password)
+	result, err := db.Query("select * from pengguna where tipe >= 0 and email = ? and password = ?", email, password)
 
 	if err != nil {
 		log.Print(err)

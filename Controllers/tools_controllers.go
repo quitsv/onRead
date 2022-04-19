@@ -42,28 +42,29 @@ func RunTools() {
 	})
 	setRedis(rdb, "Best Seller", "ayo Baca Buku yang sedang HOT!", 0)
 
-	query := "SELECT email, nama FROM pengguna where tipe = 0"
-
-	rows, err := db.Query(query)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	gocron := gocron.NewScheduler(time.UTC)
 
-	var email string
-	var nama string
+	gocron.Every(1).Month().Do(func() {
+		query := "SELECT email, nama FROM pengguna where tipe = 0"
 
-	for rows.Next() {
-		err = rows.Scan(&email, &nama)
+		rows, err := db.Query(query)
 		if err != nil {
 			log.Fatal(err)
 		}
-		message := "Hey " + nama + "! " + getRedis(rdb, "Best Seller")
-		go gocron.Every(5).Second().At("00:00").Do((func() { sendEmail(email, []byte(message)) }))
-		gocron.StartBlocking()
-	}
 
+		var email string
+		var nama string
+
+		for rows.Next() {
+			err = rows.Scan(&email, &nama)
+			if err != nil {
+				log.Fatal(err)
+			}
+			message := "Hey " + nama + "! " + getRedis(rdb, "Best Seller")
+			go sendEmail(email, []byte(message))
+		}
+	})
+	gocron.StartBlocking()
 }
 
 func sendEmail(emailPenerima string, message []byte) {
